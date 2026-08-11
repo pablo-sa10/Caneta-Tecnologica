@@ -1,0 +1,135 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { IconButton } from "@/components/ui/IconButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { IconBag, IconPenSquare } from "@/components/ui/icons";
+import { nav } from "@/lib/content";
+
+/** Rolagem a partir da qual o vidro assume — o suficiente para não piscar. */
+const GLASS_AT = 8;
+
+/**
+ * Barra fixa do topo, portada do `<header>` do design system.
+ *
+ * As classes são as do arquivo original (`flex justify-between items-center
+ * px-4 md:px-6 py-4`, `glass-panel`, `nav-load`, `link-draw`), com as cores
+ * trocadas pelos tokens equivalentes. O recuo lateral é o do DS — `px-4
+ * md:px-6`, mais apertado que o `Container` — porque lá a barra encosta na
+ * borda da tela de propósito, em vez de entrar na grade editorial do corpo.
+ *
+ * A única divergência deliberada é o vidro: no DS ele está sempre ligado, aqui
+ * só entra depois que a página sai do topo. E não é uma classe que entra e sai,
+ * é uma camada própria atrás do conteúdo cuja opacidade é animada — ligar
+ * `backdrop-filter` de um frame para o outro faz a barra estalar e o Safari
+ * repintar a dobra inteira.
+ *
+ * Mora no `layout.tsx`, não no `page.tsx`: é moldura do site, fixa e fora do
+ * fluxo, na mesma categoria do grão de filme — não é uma seção da narrativa.
+ */
+export function Navbar() {
+  const headerRef = useRef<HTMLElement>(null);
+  const glassRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const header = headerRef.current;
+    const glass = glassRef.current;
+    if (!header || !glass) return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Entrada do DS: `setTimeout(() => header.classList.add('loaded'), 100)`.
+    const entrance = window.setTimeout(() => header.classList.add("loaded"), 100);
+
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
+
+      /* Sem `trigger`, start/end são posições absolutas de scroll: o gatilho
+         é "saiu dos primeiros 8px", não a geometria de nenhum elemento. */
+      const watchScroll = (duration: number) => () => {
+        const trigger = ScrollTrigger.create({
+          start: GLASS_AT,
+          end: "max",
+          onToggle: ({ isActive }) =>
+            gsap.to(glass, {
+              opacity: isActive ? 1 : 0,
+              duration,
+              ease: "power2.out",
+              overwrite: true,
+            }),
+        });
+
+        // Recarregar a página no meio do scroll não passa por `onToggle`:
+        // o estado inicial precisa ser escrito na mão.
+        gsap.set(glass, { opacity: trigger.isActive ? 1 : 0 });
+
+        return () => trigger.kill();
+      };
+
+      mm.add("(prefers-reduced-motion: no-preference)", watchScroll(0.45));
+      mm.add("(prefers-reduced-motion: reduce)", watchScroll(0));
+
+      return () => mm.revert();
+    }, header);
+
+    return () => {
+      window.clearTimeout(entrance);
+      ctx.revert();
+    };
+  }, []);
+
+  return (
+    <header
+      ref={headerRef}
+      className="nav-load fixed inset-x-0 top-0 z-50 h-[var(--nav-h)]"
+    >
+      {/* Camada de vidro — inerte ao ponteiro, some no topo da página. */}
+      <div
+        ref={glassRef}
+        aria-hidden
+        className="glass-panel pointer-events-none absolute inset-0 border-b border-line opacity-0"
+      />
+
+      <div className="relative flex h-full items-center justify-between px-4 md:px-6">
+        {/* ---------- Marca ---------- */}
+        <div className="group flex shrink-0 cursor-pointer items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-ink text-bone transition-transform duration-500 group-hover:rotate-90">
+            <IconPenSquare className="text-xl" />
+          </div>
+          <span className="text-lg font-medium tracking-tight">
+            {nav.logo.name}
+            <span className="text-muted">{nav.logo.suffix}</span>
+          </span>
+        </div>
+
+        {/* ---------- Navegação ----------
+            Centro absoluto, como a marca do DS: os itens ficam no eixo da
+            página em vez de serem empurrados pela largura dos vizinhos. */}
+        <nav
+          aria-label="Seções"
+          className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 md:flex"
+        >
+          {nav.links.map((label) => (
+            <button
+              key={label}
+              type="button"
+              className="link-draw text-xs font-medium uppercase tracking-widest text-graphite transition-colors hover:text-ink"
+            >
+              {label}
+            </button>
+          ))}
+        </nav>
+
+        {/* ---------- Ações ---------- */}
+        <div className="flex shrink-0 items-center gap-2">
+          <ThemeToggle />
+          <IconButton aria-label={nav.bag.label} title={nav.bag.label}>
+            <IconBag className="text-base" />
+          </IconButton>
+        </div>
+      </div>
+    </header>
+  );
+}
