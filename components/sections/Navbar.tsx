@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Container } from "@/components/ui/Container";
 import { IconButton } from "@/components/ui/IconButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { IconBag, IconPenSquare } from "@/components/ui/icons";
@@ -14,13 +15,14 @@ const GLASS_AT = 8;
 /**
  * Barra fixa do topo, portada do `<header>` do design system.
  *
- * As classes são as do arquivo original (`flex justify-between items-center
- * px-4 md:px-6 py-4`, `glass-panel`, `nav-load`, `link-draw`), com as cores
- * trocadas pelos tokens equivalentes. O recuo lateral é o do DS — `px-4
- * md:px-6`, mais apertado que o `Container` — porque lá a barra encosta na
- * borda da tela de propósito, em vez de entrar na grade editorial do corpo.
+ * As classes são as do arquivo original (`flex justify-between items-center`,
+ * `glass-panel`, `nav-load`, `link-draw`), com as cores trocadas pelos tokens
+ * equivalentes. O recuo lateral é a exceção: o DS usa `px-4 md:px-6` e deixa a
+ * barra encostar na borda da tela, mas aqui ela entra no `Container` para ficar
+ * na mesma grade do corpo — a marca alinha com o título da hero em vez de
+ * flutuar 24px à esquerda dele.
  *
- * A única divergência deliberada é o vidro: no DS ele está sempre ligado, aqui
+ * A outra divergência deliberada é o vidro: no DS ele está sempre ligado, aqui
  * só entra depois que a página sai do topo. E não é uma classe que entra e sai,
  * é uma camada própria atrás do conteúdo cuja opacidade é animada — ligar
  * `backdrop-filter` de um frame para o outro faz a barra estalar e o Safari
@@ -92,7 +94,7 @@ export function Navbar() {
         className="glass-panel pointer-events-none absolute inset-0 border-b border-line opacity-0"
       />
 
-      <div className="relative flex h-full items-center justify-between px-4 md:px-6">
+      <Container className="relative flex h-full items-center justify-between">
         {/* ---------- Marca ---------- */}
         <div className="group flex shrink-0 cursor-pointer items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-ink text-bone transition-transform duration-500 group-hover:rotate-90">
@@ -129,7 +131,7 @@ export function Navbar() {
             <IconBag className="text-base" />
           </IconButton>
         </div>
-      </div>
+      </Container>
     </header>
   );
 }

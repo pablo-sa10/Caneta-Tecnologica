@@ -101,6 +101,16 @@ body {
   overflow-x: hidden;
 }
 
+/* Seleção de texto: o DS carrega `selection:bg-stone-800 selection:text-white`
+   no <body>. Em token isso é tinta sobre papel — e assim inverte sozinho no
+   tema escuro, o que a classe do original não faria. Fica no CSS, e não numa
+   classe do <body>, para valer também no que mora fora do frame (a barra
+   fixa, o toast, o que vier). */
+::selection {
+  background: var(--ink);
+  color: var(--bone);
+}
+
 /* Âncora nenhuma pode parar debaixo da barra fixa. */
 [id] {
   scroll-margin-top: var(--nav-h);
@@ -172,20 +182,33 @@ button:disabled {
   animation: hairfall 2.4s var(--ease) infinite;
 }
 
+/* Com a imagem maior que a régua, a porcentagem anda ao contrário do que
+   parece: `100%` empurra o degradê para cima e `-100%` para baixo. Para a
+   varredura descer — que é o gesto que o indicador está pedindo — a animação
+   vai de 100% para -100%, e não o contrário. */
 @keyframes hairfall {
   from {
-    background-position: 0 -100%;
+    background-position: 0 100%;
   }
   to {
-    background-position: 0 100%;
+    background-position: 0 -100%;
   }
 }
 
+/* Fora de uso por ora — a divisão entre seções passou a ser só a régua
+   horizontal. Fica aqui porque é assinatura do DS e a extração já está feita. */
 .bg-grid {
   background-size: 40px 40px;
   background-image:
     linear-gradient(to right, color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px),
     linear-gradient(to bottom, color-mix(in srgb, var(--ink) 4%, transparent) 1px, transparent 1px);
+}
+
+/* No escuro o DS sobe para 5% — a tinta clara pesa menos sobre a superfície. */
+:root[data-theme="dark"] .bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--ink) 5%, transparent) 1px, transparent 1px);
 }
 
 .aurora {
@@ -229,43 +252,52 @@ button:disabled {
    e o vídeo parece impresso na página em vez de colado por cima.
    ============================================================ */
 .hero-scrim {
-  /* Telefone: o assunto respira no topo, o texto assenta embaixo. */
+  /* Telefone: o texto e o vídeo se revezam (o vídeo só entra depois que a
+     rolagem começa, e aí o texto já saiu), então aqui o véu não precisa
+     proteger leitura nenhuma — basta assentar as bordas do vídeo contra a
+     página e deixar o meio limpo. */
   background:
     linear-gradient(
       to top,
       var(--bone) 0%,
-      var(--bone) 30%,
-      color-mix(in srgb, var(--bone) 72%, transparent) 52%,
-      transparent 82%
+      color-mix(in srgb, var(--bone) 55%, transparent) 12%,
+      transparent 34%
     ),
     linear-gradient(
       to bottom,
-      color-mix(in srgb, var(--bone) 85%, transparent) 0%,
-      transparent 22%
+      color-mix(in srgb, var(--bone) 55%, transparent) 0%,
+      transparent 14%
     );
 }
 
 @media (min-width: 1024px) {
   .hero-scrim {
-    /* Desktop: o véu pesa na coluna do texto e libera o lado do produto. */
+    /* Desktop: aqui os dois dividem a dobra ao mesmo tempo, então o véu tem
+       que pesar na coluna do texto e sair do caminho do produto. As paradas
+       são deslocadas para a esquerda em relação ao que estava: papel cheio até
+       um terço da tela (o texto ganhou proteção) e queda rápida a partir daí,
+       de modo que a caneta — que assenta perto dos 60% — fique quase sem véu
+       em cima. Antes ela vivia sob ~40% de papel; é daí que vinha o aspecto
+       apagado. */
     background:
       linear-gradient(
         to right,
         var(--bone) 0%,
-        color-mix(in srgb, var(--bone) 96%, transparent) 30%,
-        color-mix(in srgb, var(--bone) 62%, transparent) 50%,
-        color-mix(in srgb, var(--bone) 18%, transparent) 70%,
-        transparent 88%
+        var(--bone) 32%,
+        color-mix(in srgb, var(--bone) 78%, transparent) 46%,
+        color-mix(in srgb, var(--bone) 30%, transparent) 60%,
+        color-mix(in srgb, var(--bone) 6%, transparent) 72%,
+        transparent 82%
       ),
       linear-gradient(
         to top,
-        color-mix(in srgb, var(--bone) 78%, transparent) 0%,
-        transparent 24%
+        color-mix(in srgb, var(--bone) 62%, transparent) 0%,
+        transparent 20%
       ),
       linear-gradient(
         to bottom,
-        color-mix(in srgb, var(--bone) 70%, transparent) 0%,
-        transparent 18%
+        color-mix(in srgb, var(--bone) 55%, transparent) 0%,
+        transparent 16%
       );
   }
 }

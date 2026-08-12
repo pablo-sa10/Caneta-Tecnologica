@@ -37,7 +37,8 @@ export const hero = {
      aparecer por dentro das letras. */
   headline: [
     { text: "A caneta", treatment: "gradient" },
-    { text: "mais tecnológica", treatment: "outline" },
+    { text: "mais", treatment: "outline" },
+    { text: "tecnológica", treatment: "outline" },
     { text: "do mundo.", treatment: "gradient" },
   ] satisfies HeadlineLine[],
 
@@ -67,4 +68,17 @@ export const hero = {
   },
 
   scrollHint: "Scroll to control",
+} as const;
+
+/**
+ * Esboço da dobra que vem depois da hero — existe para o scroll ter para onde
+ * ir quando o vídeo termina, e para marcar o lugar dela na composição. O texto
+ * aqui é deliberadamente sobre o próprio estado do trabalho: nada de
+ * característica de produto inventada para preencher espaço.
+ */
+export const nextFold = {
+  eyebrow: "02 / Próxima dobra",
+  status: "Rascunho",
+  title: "Em construção",
+  lead: "O espaço da próxima seção já está reservado na composição. O conteúdo entra aqui.",
 } as const;
