@@ -13,6 +13,19 @@ import { nav } from "@/lib/content";
 const GLASS_AT = 8;
 
 /**
+ * Presença do vidro no topo e depois da rolagem.
+ *
+ * O piso não é zero de propósito. Transparente de verdade, a barra fica à
+ * mercê do que estiver passando atrás dela — e o que passa atrás é um vídeo,
+ * com assunto claro e contorno escuro em movimento. Os itens da barra ficavam
+ * ora legíveis, ora não, dependendo do frame. Um resto de vidro no topo
+ * resolve isso sem virar uma faixa sólida: ainda lê como "sem barra", só que
+ * com chão suficiente para o texto se apoiar.
+ */
+const GLASS_TOP = 0.35;
+const GLASS_SCROLLED = 1;
+
+/**
  * Barra fixa do topo, portada do `<header>` do design system.
  *
  * As classes são as do arquivo original (`flex justify-between items-center`,
@@ -49,14 +62,23 @@ export function Navbar() {
       const mm = gsap.matchMedia();
 
       /* Sem `trigger`, start/end são posições absolutas de scroll: o gatilho
-         é "saiu dos primeiros 8px", não a geometria de nenhum elemento. */
+         é "saiu dos primeiros 8px", não a geometria de nenhum elemento.
+
+         O fim é deliberadamente inalcançável. O ScrollTrigger trata o trecho
+         como um intervalo `[start, end)`, então com `end: "max"` ele desativa
+         no instante em que a rolagem encosta no rodapé — e a barra voltava ao
+         vidro do topo bem ali, com a última seção passando atrás dela. Como o
+         que se quer aqui é um limiar e não um trecho, o fim é jogado para
+         além do fundo da página: uma vez cruzados os 8px, o gatilho fica
+         ativo até a rolagem voltar. A função é reavaliada a cada refresh, de
+         modo que crescer ou encolher a página não reabre o problema. */
       const watchScroll = (duration: number) => () => {
         const trigger = ScrollTrigger.create({
           start: GLASS_AT,
-          end: "max",
+          end: () => ScrollTrigger.maxScroll(window) + window.innerHeight,
           onToggle: ({ isActive }) =>
             gsap.to(glass, {
-              opacity: isActive ? 1 : 0,
+              opacity: isActive ? GLASS_SCROLLED : GLASS_TOP,
               duration,
               ease: "power2.out",
               overwrite: true,
@@ -65,7 +87,9 @@ export function Navbar() {
 
         // Recarregar a página no meio do scroll não passa por `onToggle`:
         // o estado inicial precisa ser escrito na mão.
-        gsap.set(glass, { opacity: trigger.isActive ? 1 : 0 });
+        gsap.set(glass, {
+          opacity: trigger.isActive ? GLASS_SCROLLED : GLASS_TOP,
+        });
 
         return () => trigger.kill();
       };
@@ -87,11 +111,14 @@ export function Navbar() {
       ref={headerRef}
       className="nav-load fixed inset-x-0 top-0 z-50 h-[var(--nav-h)]"
     >
-      {/* Camada de vidro — inerte ao ponteiro, some no topo da página. */}
+      {/* Camada de vidro — inerte ao ponteiro, recua (sem sumir) no topo da
+          página. A classe já entrega o piso de `GLASS_TOP` no primeiro paint,
+          para a barra não nascer transparente e ganhar chão só depois que o
+          GSAP monta. */}
       <div
         ref={glassRef}
         aria-hidden
-        className="glass-panel pointer-events-none absolute inset-0 border-b border-line opacity-0"
+        className="glass-panel pointer-events-none absolute inset-0 border-b border-line opacity-35"
       />
 
       <Container className="relative flex h-full items-center justify-between">

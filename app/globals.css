@@ -321,16 +321,21 @@ button:disabled {
    ============================================================ */
 
 /* O vidro da barra: superfície translúcida + desfoque do que passa atrás.
-   No DS é branco a 55%; aqui o branco vira a superfície de papel para que
-   a barra acompanhe o tema em vez de clarear a página no escuro. */
+   No DS é branco a 55%; aqui o branco vira a superfície de papel para que a
+   barra acompanhe o tema em vez de clarear a página no escuro.
+
+   A opacidade sobe acima dos 55% do original porque o fundo é outro: no DS o
+   vidro corre sobre superfície lisa, aqui ele passa por cima de um vídeo com
+   assunto claro e contorno escuro, e a 55% o que está atrás atravessava e
+   embolava a leitura dos itens da barra. */
 .glass-panel {
-  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  background: color-mix(in srgb, var(--paper) 72%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
 
 :root[data-theme="dark"] .glass-panel {
-  background: rgba(26, 25, 23, 0.72);
+  background: rgba(26, 25, 23, 0.84);
 }
 
 /* Entrada da barra no load — desce do topo uma vez só. */
