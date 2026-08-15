@@ -347,6 +347,214 @@ button:disabled {
   }
 }
 
+/* ============================================================
+   ILHA ESCURA
+   Sobre fotografia a página perde o direito de decidir a cor: a
+   foto é escura nos dois temas, então tinta clara é a única que
+   lê. Em vez de espalhar exceção (`text-white` aqui, `bg-black`
+   ali), o escopo redeclara os mesmos tokens da banda escura do
+   DS. Dentro dele todo utilitário já nasce certo — `text-ink` é
+   claro, `bg-ink text-bone` é botão claro com texto escuro — e o
+   tema da página deixa de importar.
+   ============================================================ */
+.on-dark {
+  color-scheme: dark;
+
+  /* Redeclarar `--ink` não basta: o `color` do <body> já resolveu `var(--ink)`
+     uma vez, e o que os descendentes herdam é a cor computada, não a variável.
+     Sem esta linha, tudo que depende da cor herdada — o "Artools" do cartão,
+     por exemplo — continua com a tinta do tema da página e some no escuro.
+     Reaplicar aqui obriga o escopo a resolver de novo, com os tokens dele. */
+  color: var(--ink);
+
+  --bone: #1a1917;
+  --paper: #24231f;
+  --mist: #201f1c;
+  --surface-3: #2e2c27;
+
+  --ink: #efede7;
+  --slate: #bdb7ad;
+  --graphite: #a19a90;
+  --muted: #8a847a;
+  --line: #33312b;
+  --line-soft: #2a2824;
+
+  --grad-ink: linear-gradient(135deg, #efede7 0%, #a19a90 100%);
+  --grad-veil: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+  --grad-aurora: radial-gradient(circle, rgba(239, 237, 231, 0.22) 0%, rgba(239, 237, 231, 0) 70%);
+  --grad-hairline: linear-gradient(to right, transparent, #45423b, transparent);
+
+  /* Precisa ser redeclarado aqui, e não só herdado. O `--grad-beam` do `:root`
+     é escrito com `var(--ink)` dentro, e um `var()` dentro de propriedade
+     customizada é substituído no elemento onde a propriedade é *declarada* —
+     ou seja, no `:root`, com a tinta do tema da página. O que os descendentes
+     herdam já vem resolvido, e redeclarar `--ink` aqui não alcança mais nada.
+     No tema claro o feixe saía com a tinta escura do `:root` e sumia sobre o
+     cartão. É o mesmo mecanismo que apagava o "Artools".
+
+     E é branco puro, não `--ink`: isto é um facho de luz, não tinta. Luz não
+     tem tema. */
+  --grad-beam: conic-gradient(from 0deg, transparent 0 340deg, #fff 360deg);
+}
+
+/* ============================================================
+   CARROSSEL — seção 5 do DS
+   Os quadros ficam empilhados e só a opacidade muda.
+
+   O DS faz o quadro em cartaz crescer sozinho (Ken Burns, 10s);
+   aqui a aproximação é da rolagem, e as duas escalas juntas se
+   multiplicariam e brigariam pelo mesmo `transform`. Ficou a que
+   responde ao gesto — ver `Signature.tsx`. O que resta abaixo é
+   só a folga que o desfoque exige.
+   ============================================================ */
+.carousel-slide {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+.carousel-slide.active {
+  opacity: 1;
+}
+
+/* O DS parte de `scale(1)`; aqui o piso é 1.06 porque estas fotos entram
+   desfocadas, e o desfoque come as bordas — sem a folga aparece uma moldura
+   clara em volta da imagem. É valor fixo: a variação de escala é da rolagem,
+   aplicada no palco que envolve os quadros. */
+.carousel-slide img {
+  transform: scale(1.06);
+}
+
+/* Halo do selo. Mora aqui, e não numa classe arbitrária do Tailwind, porque a
+   vírgula de `color-mix()` quebra o parser de valor arbitrário de sombra — a
+   classe é aceita, nenhuma regra é emitida e o brilho some sem avisar. Em
+   token, ele acompanha o escopo: dentro de `.on-dark` a tinta é clara. */
+.seal-glow {
+  box-shadow: 0 0 30px color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+/* ============================================================
+   MARQUEE — seção 5 do DS
+   Duas cópias idênticas da faixa correm lado a lado; quando a
+   primeira sai inteira pela esquerda (`translateX(-100%)`), a
+   segunda está exatamente onde a primeira começou, e o corte
+   não aparece. O `min-width: 100%` é o que garante isso mesmo
+   quando o conteúdo é mais estreito que a tela.
+   ============================================================ */
+.marquee-container {
+  display: flex;
+  overflow: hidden;
+  user-select: none;
+}
+
+.marquee-content {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-around;
+  min-width: 100%;
+  animation: scroll 40s linear infinite;
+}
+
+.marquee-content.reverse {
+  animation-direction: reverse;
+}
+
+/* Parar sob o ponteiro é o que transforma a faixa de enfeite em algo
+   legível: quem quiser ler, lê. */
+.marquee-container:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+/* Apagamento das pontas. O DS resolve com dois retângulos em degradê por cima,
+   pintados na cor da página — e por isso precisa de uma regra extra no tema
+   escuro para trocar essa cor (o próprio arquivo tem o remendo). Uma máscara
+   alpha de verdade — que é o que o rótulo dele promete — não pinta nada: ela
+   recorta o alfa do elemento, então serve os dois temas sem saber a cor de
+   nada, e a superfície por trás pode mudar à vontade. */
+.marquee-mask {
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    #000 12%,
+    #000 88%,
+    transparent 100%
+  );
+}
+
+/* ============================================================
+   FLASHLIGHT — variante de card do DS (seção 4.3)
+   Um radial de 600px acompanha o ponteiro dentro do cartão. As
+   coordenadas chegam em `--mouse-x`/`--mouse-y`, escritas pelo
+   próprio primitivo no `onPointerMove`.
+   ============================================================ */
+.flashlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.flashlight-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(28, 28, 28, 0.09),
+    transparent 42%
+  );
+  opacity: 0;
+  transition: opacity var(--dur-base);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* `.is-on` é o par de toque do `:hover` — ver `TapActivation`. A lanterna
+   precisa dele aqui, e não numa variante do Tailwind, porque quem acende é um
+   pseudoelemento. Sem coordenada de ponteiro, o radial fica onde o valor
+   padrão manda: o centro do cartão. */
+.flashlight-card:hover::before,
+.flashlight-card.is-on::before {
+  opacity: 1;
+}
+
+/* No escuro a lanterna clareia em vez de escurecer. */
+:root[data-theme="dark"] .flashlight-card::before {
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(239, 237, 231, 0.07),
+    transparent 42%
+  );
+}
+
+/* Varredura que cruza a foto no hover — o `.beam-button::before` do DS
+   transposto para o eixo vertical e para uma superfície grande.
+
+   O branco aqui é literal, e essa é a exceção que confirma a regra dos tokens:
+   a fotografia por baixo é escura nos dois temas (não é superfície da página,
+   é imagem), então o brilho que passa por ela também não pode virar. Um
+   `var(--paper)` acertaria no claro e sumiria no escuro. O deslocamento fica
+   com o Tailwind, no elemento — só o degradê mora aqui. */
+.scan-sweep {
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.22), transparent);
+}
+
 /* Grão de filme global. */
 .noise {
   position: fixed;
@@ -523,7 +731,7 @@ button:disabled {
   position: absolute;
   inset: -1000%;
   background: var(--grad-beam);
-  animation: spin 2.2s linear infinite;
+  animation: spin var(--ring-spin, 2.2s) linear infinite;
 }
 
 /* Brilho que atravessa o botão secundário no hover. */
@@ -556,13 +764,21 @@ button:disabled {
   .hairline-y,
   .radar-dot::after,
   .conic-ring span.ring,
-  .text-photo {
+  .text-photo,
+  .marquee-content {
     animation: none;
   }
 
   /* Sem a varredura, a régua vertical vira um traço estático legível. */
   .hairline-y {
     background: var(--line);
+  }
+
+  /* O carrossel para de trocar pelo JS e a aproximação por rolagem não é nem
+     criada; aqui some o esmaecer, para que o quadro em cartaz seja
+     simplesmente um quadro. */
+  .carousel-slide {
+    transition: none;
   }
 
   /* A barra já nasce no lugar — sem a descida do topo. */

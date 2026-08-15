@@ -122,9 +122,14 @@ export function Navbar() {
       />
 
       <Container className="relative flex h-full items-center justify-between">
-        {/* ---------- Marca ---------- */}
-        <div className="group flex shrink-0 cursor-pointer items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-ink text-bone transition-transform duration-500 group-hover:rotate-90">
+        {/* ---------- Marca ----------
+            `data-tap` + `group-[.is-on]:` é o par de toque do `group-hover:`;
+            ver `TapActivation`. */}
+        <div
+          data-tap
+          className="group flex shrink-0 cursor-pointer items-center gap-2"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-sm bg-ink text-bone transition-transform duration-500 group-hover:rotate-90 group-[.is-on]:rotate-90">
             <IconPenSquare className="text-xl" />
           </div>
           <span className="text-lg font-medium tracking-tight">

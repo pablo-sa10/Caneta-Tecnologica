@@ -72,7 +72,7 @@ export function IconBag(props: IconProps) {
   );
 }
 
-/** `solar:arrow-right-bold-duotone` */
+/** `solar:arrow-right-linear` */
 export function IconArrowRight(props: IconProps) {
   return (
     <svg
@@ -84,7 +84,7 @@ export function IconArrowRight(props: IconProps) {
       aria-hidden="true"
       focusable="false"
       {...props}
-      dangerouslySetInnerHTML={{ __html: "<g fill=\"currentColor\"><path fill-rule=\"evenodd\" d=\"M3.25 12a.75.75 0 0 1 .75-.75h9.25v1.5H4a.75.75 0 0 1-.75-.75\" clip-rule=\"evenodd\" opacity=\".5\"/><path d=\"M13.25 12.75V18a.75.75 0 0 0 1.28.53l6-6a.75.75 0 0 0 0-1.06l-6-6a.75.75 0 0 0-1.28.53z\"/></g>" }}
+      dangerouslySetInnerHTML={{ __html: "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\" d=\"M4 12h16m-6 6l6-6l-6-6\"/>" }}
     />
   );
 }
@@ -102,6 +102,91 @@ export function IconArrowDown(props: IconProps) {
       focusable="false"
       {...props}
       dangerouslySetInnerHTML={{ __html: "<path fill=\"none\" stroke=\"currentColor\" stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"1.5\" d=\"M12 4v16m-6-6l6 6l6-6\"/>" }}
+    />
+  );
+}
+
+/** `solar:crown-star-bold-duotone` */
+export function IconCrown(props: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+      dangerouslySetInnerHTML={{ __html: "<g fill=\"currentColor\"><path d=\"m21.838 11.126l-.229 2.436c-.378 4.012-.567 6.019-1.75 7.228C18.678 22 16.906 22 13.36 22h-2.72c-3.545 0-5.317 0-6.5-1.21s-1.371-3.216-1.749-7.228l-.23-2.436c-.18-1.912-.27-2.869.058-3.264a1 1 0 0 1 .675-.367c.476-.042 1.073.638 2.268 1.998c.618.704.927 1.055 1.271 1.11a.92.92 0 0 0 .562-.09c.319-.16.53-.595.955-1.464l2.237-4.584C10.989 2.822 11.39 2 12 2s1.011.822 1.813 2.465l2.237 4.584c.424.87.636 1.304.955 1.464c.176.089.37.12.562.09c.344-.055.653-.406 1.271-1.11c1.195-1.36 1.792-2.04 2.268-1.998a1 1 0 0 1 .675.367c.327.395.237 1.352.057 3.264\" opacity=\".5\"/><path d=\"m12.952 12.699l-.098-.176c-.38-.682-.57-1.023-.854-1.023s-.474.34-.854 1.023l-.098.176c-.108.194-.162.29-.246.354c-.085.064-.19.088-.4.135l-.19.044c-.738.167-1.107.25-1.195.532s.164.577.667 1.165l.13.152c.143.167.215.25.247.354s.021.215 0 .438l-.02.203c-.076.785-.114 1.178.115 1.352c.23.174.576.015 1.267-.303l.178-.082c.197-.09.295-.136.399-.136s.202.046.399.136l.178.082c.691.319 1.037.477 1.267.303s.191-.567.115-1.352l-.02-.203c-.021-.223-.032-.334 0-.438s.104-.187.247-.354l.13-.152c.503-.588.755-.882.667-1.165c-.088-.282-.457-.365-1.195-.532l-.19-.044c-.21-.047-.315-.07-.4-.135c-.084-.064-.138-.16-.246-.354\"/></g>" }}
+    />
+  );
+}
+
+/** `solar:database-bold-duotone` */
+export function IconDatabase(props: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+      dangerouslySetInnerHTML={{ __html: "<g fill=\"currentColor\"><path d=\"M12 22c4.418 0 8-1.79 8-4V6c0 2.21-3.582 4-8 4S4 8.21 4 6v12c0 2.21 3.582 4 8 4\" opacity=\".5\"/><path d=\"M12 10c4.418 0 8-1.79 8-4s-3.582-4-8-4s-8 1.79-8 4s3.582 4 8 4\"/><path d=\"M4 6v6c0 2.21 3.582 4 8 4s8-1.79 8-4V6c0 2.21-3.582 4-8 4S4 8.21 4 6\" opacity=\".5\"/></g>" }}
+    />
+  );
+}
+
+/** `solar:pen-new-square-linear` */
+export function IconPenLine(props: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+      dangerouslySetInnerHTML={{ __html: "<g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" d=\"M22 10.5V12c0 4.714 0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12s0-7.071 1.464-8.536C4.93 2 7.286 2 12 2h1.5\"/><path d=\"m16.652 3.455l.649-.649A2.753 2.753 0 0 1 21.194 6.7l-.65.649m-3.892-3.893s.081 1.379 1.298 2.595c1.216 1.217 2.595 1.298 2.595 1.298m-3.893-3.893L10.687 9.42c-.404.404-.606.606-.78.829q-.308.395-.524.848c-.121.255-.211.526-.392 1.068L8.412 13.9m0 0l-.374 1.123a.742.742 0 0 0 .94.939l1.122-.374l1.735-.579c.542-.18.813-.27 1.068-.392q.453-.217.848-.524c.223-.174.425-.376.83-.78l5.964-5.965M10.1 15.588L8.412 13.9\"/></g>" }}
+    />
+  );
+}
+
+/** `solar:soundwave-square-linear` */
+export function IconSoundwave(props: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+      dangerouslySetInnerHTML={{ __html: "<g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path stroke-linecap=\"round\" d=\"M12 7v10m5-7v4M7 9v6\"/><path d=\"M2 12c0-4.714 0-7.071 1.464-8.536C4.93 2 7.286 2 12 2s7.071 0 8.535 1.464C22 4.93 22 7.286 22 12s0 7.071-1.465 8.535C19.072 22 16.714 22 12 22s-7.071 0-8.536-1.465C2 19.072 2 16.714 2 12Z\"/></g>" }}
+    />
+  );
+}
+
+/** `solar:scale-linear` */
+export function IconScale(props: IconProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width="1em"
+      height="1em"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      {...props}
+      dangerouslySetInnerHTML={{ __html: "<g fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><path d=\"M3 10c0-3.771 0-5.657 1.172-6.828S7.229 2 11 2h2c3.771 0 5.657 0 6.828 1.172S21 6.229 21 10v4c0 3.771 0 5.657-1.172 6.828S16.771 22 13 22h-2c-3.771 0-5.657 0-6.828-1.172S3 17.771 3 14z\"/><path stroke-linecap=\"round\" d=\"M8 18h8m.412-8.03l.665-1.663A2 2 0 0 0 15.55 5.59l-.425-.07a19 19 0 0 0-6.247 0l-.426.07a2 2 0 0 0-1.528 2.716L7.59 9.97c.235.59.87.914 1.486.76c1.92-.48 3.93-.48 5.85 0a1.27 1.27 0 0 0 1.487-.76Zm-6.232-.041l-.676-1.883\"/></g>" }}
     />
   );
 }

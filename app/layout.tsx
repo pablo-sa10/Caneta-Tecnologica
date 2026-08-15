@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Navbar } from "@/components/sections/Navbar";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
+import { TapActivation } from "@/components/providers/TapActivation";
 import "./globals.css";
 
 // O design system usa Inter em 100% da interface e o pacote só traz
@@ -38,6 +39,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
       <body className="min-h-full flex flex-col font-sans">
+        {/* Sem marcação própria: só escuta o toque e acende `.is-on` no alvo,
+            para que o que responde ao ponteiro também responda ao dedo. */}
+        <TapActivation />
         <Navbar />
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
         {/* Grão de filme por cima de tudo — fixo, inerte ao ponteiro. */}

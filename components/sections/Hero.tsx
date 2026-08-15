@@ -4,6 +4,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { LetteringLine } from "@/components/ui/LetteringLine";
 import { BeamButton } from "@/components/ui/BeamButton";
 import { ConicButton } from "@/components/ui/ConicButton";
 import { IconArrowDown } from "@/components/ui/icons";
@@ -28,18 +29,11 @@ const EASE = "expo.out";
  */
 const PACE = 1.6;
 
-/** Tratamento de lettering do `content.ts` → classe-assinatura do DS. */
-const TREATMENT_CLASS = {
-  outline: "text-outline",
-  gradient: "gradient-text",
-  photo: "text-photo",
-} as const;
-
 /**
  * Avanço vertical de uma linha do título para a seguinte, em `em`. É o
- * `leading-[0.8]` do `h1`: o padding das máscaras é cancelado pela margem
- * negativa, então o que sobra entre o topo de uma linha e o da próxima é a
- * entrelinha limpa. Mexeu no `leading`, mexa aqui.
+ * `leading` do `h1`: o padding das máscaras é cancelado pela margem negativa,
+ * então o que sobra entre o topo de uma linha e o da próxima é a entrelinha
+ * limpa. Mexeu no `leading`, mexa aqui.
  */
 const LINE_ADVANCE_EM = 0.8;
 
@@ -254,59 +248,62 @@ export function Hero() {
                 {/* Estilo do `#hero-title` do DS: `font-semibold`,
                     `tracking-tighter`, linhas mascaradas. Os corpos são
                     menores que os de lá (`6.2 / 7.8 / 8.6rem`) porque o
-                    critério aqui é outro: "mais tecnológica" tem 16
-                    caracteres contra os 9 de "LETTERING", e nos números do DS
-                    ela avançava por cima da caneta. Nestes três valores a
-                    linha mais larga ocupa ~59% da folha em qualquer
-                    breakpoint, deixando o terço direito livre para o produto.
+                    critério aqui é outro: "+tecnológica" mede ~5,6em contra
+                    os ~4,3em de "LETTERING", e nos números do DS ela avançava
+                    por cima da caneta. Nestes valores a linha mais larga fica
+                    entre metade e três quartos da coluna, deixando o terço
+                    direito da dobra livre para o produto.
 
-                    A entrelinha é mais fechada que os `0.9` do DS porque o
-                    texto de lá é caixa alta: sem a banda vazia acima da altura
-                    de x, `0.9` já lê como apertado. Em caixa baixa não —
-                    daí `0.8`.
+                    A entrelinha está abaixo do piso físico, e isso é
+                    deliberado. A perna do "g" de "tecnológica" desce 0.241em
+                    abaixo da linha de base e, logo embaixo dela, em "do
+                    mundo.", passa a haste do "d", que sobe 0.727em: para os
+                    dois desenhos não se tocarem, as linhas teriam que estar a
+                    0.969em uma da outra. Em `0.8` eles se cruzam — o aperto é
+                    o que se quer, e o cruzamento é o preço.
 
-                    No telefone o valor é maior que os `13vw` do DS: com o
-                    título quebrado em quatro linhas curtas, a mais larga
-                    ("tecnológica") mede ~4,7em, e a `15vw` ela ocupa ~81% da
-                    largura útil num aparelho de 390px. O teto antes de
-                    encostar na margem fica por volta de `18vw`.
+                    O que se decide aqui, então, não é a distância: é quem
+                    passa por cima. As linhas recebem `layer` em ordem
+                    invertida, de modo que a perna do "g" seja pintada sobre a
+                    palavra seguinte em vez de interrompida por ela. Para
+                    eliminar o cruzamento, e não só arbitrá-lo, o `leading`
+                    precisa subir para 0.969 ou mais — com o `LINE_ADVANCE_EM`
+                    junto.
+
+                    (O DS usa `0.9` sem esse problema porque o texto dele é
+                    caixa alta: sem perna descendo, o piso é bem menor.)
+
+                    No telefone o corpo não sai de `vw`, e sim da largura que
+                    sobra: `(100vw - recuo) / 6.4`. A diferença importa porque
+                    o recuo do `Container` é fixo em pixels — não acompanha a
+                    tela —, então a mesma medida em `vw` sobra num aparelho
+                    largo e transborda num estreito. Dividindo a largura útil,
+                    a linha mais comprida ocupa a mesma fração dela em
+                    qualquer aparelho: "+tecnológica" mede ~5,6em e o divisor
+                    a deixa em ~88% da folha, com margem para a variação de
+                    métrica entre plataformas. O recuo dobra no `md`, e o
+                    segundo valor só corrige isso — daí a única mudança ser o
+                    `3rem` virar `6rem`.
 
                     O `word-spacing` negativo é acréscimo: `tracking-tighter`
                     aperta as letras mas não toca no espaço, então nos corpos
                     grandes o vão entre palavras ficava desenhando um buraco
                     no meio da linha. No DS o problema não aparece porque lá
                     cada linha do título é uma palavra só. */}
-                <h1 className="flex flex-col text-[16vw] font-semibold leading-[0.8] tracking-tighter [word-spacing:-0.08em] lg:text-[5rem] xl:text-[6.2rem] 2xl:text-[7rem]">
+                <h1 className="flex flex-col text-[calc((100vw_-_3rem)/6.4)] font-semibold leading-[0.8] tracking-tighter [word-spacing:-0.08em] md:text-[calc((100vw_-_6rem)/6.4)] lg:text-[5rem] xl:text-[6.2rem] 2xl:text-[7rem]">
                   {hero.headline.map((line, index) => (
-                    /* Máscara: o wrapper corta, o inner desliza de baixo. O
-                       padding abre espaço para o que a entrelinha apertada
-                       deixa de fora — sem ele o overflow come o acento de
-                       "tecnológica" em cima e a perna do "g" embaixo — e a
-                       margem negativa devolve esse espaço, para o rastro não
-                       afastar as linhas.
-
-                       A margem só cancela o padding porque o `h1` é `flex`:
-                       entre irmãos em fluxo normal as margens verticais
-                       colapsam, e duas de -0.2em viram uma de -0.2em, não
-                       -0.4em. O padding somava 0.4em e a margem devolvia
-                       metade — era daí que vinha o vão a mais entre as
-                       linhas, não do valor do padding. Em contexto flex não
-                       há colapso: as duas margens contam, o cancelamento é
-                       exato e quem controla o espaço passa a ser só o
-                       `leading` acima. */
-                    <span
+                    <LetteringLine
                       key={line.text}
-                      className="-my-[0.2em] block overflow-hidden py-[0.2em]"
-                    >
-                      <span
-                        className={`js-headline-inner block ${
-                          TREATMENT_CLASS[line.treatment]
-                        }`}
-                        style={photoOffset(index)}
-                      >
-                        {line.text}
-                      </span>
-                    </span>
+                      line={line}
+                      pad={0.5}
+                      /* Ordem invertida: a primeira linha é a mais alta na
+                         pilha. Com a entrelinha abaixo do piso os desenhos se
+                         cruzam, e assim quem passa por cima é a perna do "g"
+                         em vez da palavra de baixo. */
+                      layer={hero.headline.length - index}
+                      className="js-headline-inner"
+                      style={photoOffset(index)}
+                    />
                   ))}
                 </h1>
 

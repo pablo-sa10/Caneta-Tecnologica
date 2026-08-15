@@ -18,8 +18,13 @@ const ICONS = {
   "moon-stars-linear": "IconMoonStars",
   "sun-2-linear": "IconSun",
   "bag-3-linear": "IconBag",
-  "arrow-right-bold-duotone": "IconArrowRight",
+  "arrow-right-linear": "IconArrowRight",
   "arrow-down-linear": "IconArrowDown",
+  "crown-star-bold-duotone": "IconCrown",
+  "database-bold-duotone": "IconDatabase",
+  "pen-new-square-linear": "IconPenLine",
+  "soundwave-square-linear": "IconSoundwave",
+  "scale-linear": "IconScale",
 };
 
 const collection = JSON.parse(
