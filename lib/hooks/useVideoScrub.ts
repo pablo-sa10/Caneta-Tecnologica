@@ -23,8 +23,22 @@ const supportsFrameCallback = (
   video: HTMLVideoElement,
 ): video is VideoWithFrameCallback => "requestVideoFrameCallback" in video;
 
-/** Tempo máximo que um seek pode ficar sem confirmação antes de destravarmos. */
-const SEEK_WATCHDOG_MS = 250;
+/**
+ * Tempo máximo que um seek pode ficar sem confirmação antes de destravarmos.
+ *
+ * O valor precisa ser maior que o pior seek possível do material, senão o cão
+ * de guarda vira o problema que ele existe para evitar: ele solta a trava com
+ * o decodificador ainda trabalhando, o rAF seguinte pede outro seek e a fila
+ * cresce — que é exatamente o modo de falha que trava a aba. Com um GOP de 4s,
+ * um seek pode ter que percorrer 95 inter-frames, e 250ms não cobriam isso em
+ * máquina fraca. Não é a correção de verdade (essa é reencodar; ver o comentário
+ * de `precision-series.mp4` na skill do projeto), mas evita que o remédio piore
+ * a doença enquanto o arquivo for este.
+ *
+ * Continua sendo um teto generoso, não uma espera: quem normalmente libera a
+ * trava é o `seeked` ou o `requestVideoFrameCallback`, em milissegundos.
+ */
+const SEEK_WATCHDOG_MS = 600;
 
 export type VideoScrubState = {
   /** metadados chegaram: `duration` é confiável e o primeiro frame pode pintar */
