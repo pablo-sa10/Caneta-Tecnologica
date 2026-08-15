@@ -111,6 +111,37 @@ body {
   color: var(--bone);
 }
 
+/* Barra de rolagem quase invisível. O DS não tem uma porque a página dele mora
+   num frame; aqui ela corre pela borda da tela e, na largura padrão do sistema,
+   é a única coisa da tela que não passou pelo design system.
+
+   Fica fina e sem trilho, com o polegar em tinta bem diluída — presente o
+   suficiente para dizer onde se está, discreto o suficiente para sumir. Ela
+   acompanha o tema, porque é `--ink`. `scrollbar-width: thin` cobre o Firefox,
+   e o bloco `::-webkit-scrollbar` cobre o resto. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ink) 18%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ink) 32%, transparent);
+}
+
 /* Âncora nenhuma pode parar debaixo da barra fixa. */
 [id] {
   scroll-margin-top: var(--nav-h);
@@ -427,6 +458,19 @@ button:disabled {
   transform: scale(1.06);
 }
 
+/* Luz que nasce na borda de cima do rodapé — o `radial-gradient(700px circle
+   at 50% 0%)` do DS. Mora aqui e não numa classe arbitrária do Tailwind pela
+   mesma razão do halo abaixo: a vírgula de `color-mix()` quebra o parser de
+   valor arbitrário, a classe é aceita e nenhuma regra é emitida. Em token, ela
+   acompanha o escopo — dentro de `.on-dark` a tinta é clara. */
+.footer-glow {
+  background: radial-gradient(
+    700px circle at 50% 0%,
+    color-mix(in srgb, var(--ink) 13%, transparent),
+    transparent 60%
+  );
+}
+
 /* Halo do selo. Mora aqui, e não numa classe arbitrária do Tailwind, porque a
    vírgula de `color-mix()` quebra o parser de valor arbitrário de sombra — a
    classe é aceita, nenhuma regra é emitida e o brilho some sem avisar. Em
@@ -500,48 +544,75 @@ button:disabled {
 }
 
 /* ============================================================
-   FLASHLIGHT — variante de card do DS (seção 4.3)
-   Um radial de 600px acompanha o ponteiro dentro do cartão. As
-   coordenadas chegam em `--mouse-x`/`--mouse-y`, escritas pelo
-   próprio primitivo no `onPointerMove`.
+   FLASHLIGHT — seção 4.3 do DS, esticada
+   O DS põe a lanterna dentro de cada cartão. Aqui ela cobre a
+   dobra inteira: uma luz só, que atravessa cabeçalho, réguas e
+   cartões sem se repartir.
+
+   Por isso ela pinta *por cima* e não por baixo. Os cartões são
+   opacos e a grade não tem vão nenhum entre eles — no fundo, a
+   luz ficaria escondida atrás deles e só apareceria na faixa do
+   cabeçalho. Numa camada acima, ela passa por tudo, e a
+   opacidade baixa é o que a mantém como luz em vez de véu.
+
+   As coordenadas chegam em `--mouse-x`/`--mouse-y`, escritas no
+   `onPointerMove` da seção.
    ============================================================ */
-.flashlight-card {
+.flashlight-area {
   position: relative;
-  overflow: hidden;
+  --flash-size: 900px;
 }
 
-.flashlight-card::before {
-  content: "";
+/* A luz é um elemento de tamanho fixo que se desloca, e não um gradiente
+   centrado no ponteiro.
+
+   A diferença é de custo, e é grande. Escrever a posição dentro do
+   `radial-gradient` obriga o navegador a recalcular e repintar a área toda a
+   cada movimento — numa dobra de 1400px isso mede ~20ms por quadro, e o que
+   se vê é tudo o que estiver animando junto engasgar. Aqui o degradê é sempre
+   o mesmo desenho: o que muda é um `transform`, que o compositor aplica sem
+   repintar nada.
+
+   A margem negativa de meia largura é o que faz o `translate` mirar o centro
+   da luz em vez do canto dela — deixando o `transform` livre para ser só
+   posição, sem um `-50%` embutido. */
+.flash-light {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: var(--flash-size);
+  height: var(--flash-size);
+  margin: calc(var(--flash-size) / -2) 0 0 calc(var(--flash-size) / -2);
+  /* `closest-side` num quadrado é a metade da largura; a parada em 84% põe o
+     fim do esmaecimento nos mesmos 42% do raio que o DS usa. */
   background: radial-gradient(
-    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    circle closest-side,
     rgba(28, 28, 28, 0.09),
-    transparent 42%
+    transparent 84%
   );
   opacity: 0;
   transition: opacity var(--dur-base);
   pointer-events: none;
-  z-index: 2;
+  z-index: 20;
+  will-change: transform;
 }
 
-/* `.is-on` é o par de toque do `:hover` — ver `TapActivation`. A lanterna
-   precisa dele aqui, e não numa variante do Tailwind, porque quem acende é um
-   pseudoelemento. Sem coordenada de ponteiro, o radial fica onde o valor
-   padrão manda: o centro do cartão. */
-.flashlight-card:hover::before,
-.flashlight-card.is-on::before {
+.flashlight-area:hover .flash-light {
   opacity: 1;
 }
 
 /* No escuro a lanterna clareia em vez de escurecer. */
-:root[data-theme="dark"] .flashlight-card::before {
+:root[data-theme="dark"] .flash-light {
   background: radial-gradient(
-    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    circle closest-side,
     rgba(239, 237, 231, 0.07),
-    transparent 42%
+    transparent 84%
   );
 }
+
+/* Sem par de toque, ao contrário dos outros efeitos da página: esta luz *é* a
+   posição do ponteiro. Acendê-la no dedo daria um clarão parado no meio da
+   dobra, que não significa nada. */
 
 /* Varredura que cruza a foto no hover — o `.beam-button::before` do DS
    transposto para o eixo vertical e para uma superfície grande.

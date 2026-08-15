@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type PointerEvent } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { FlashlightCard } from "@/components/ui/FlashlightCard";
 import { IconPenLine, IconScale, IconSoundwave } from "@/components/ui/icons";
 import { experience } from "@/lib/content";
 
@@ -32,9 +31,47 @@ const CARD_ICON = {
  * A grade não tem vão entre os cartões. O DS separa células com régua de 1px,
  * nunca com ar — cartão flutuando com sombra é vocabulário de outra escola. O
  * conjunto lê como um bloco de três colunas, não como três objetos soltos.
+ *
+ * A lanterna do DS, que lá vive dentro de cada cartão, aqui cobre a dobra
+ * inteira: uma luz só, atravessando cabeçalho, réguas e cartões. Como o
+ * conjunto já lê como um bloco, repartir a luz célula a célula desenharia de
+ * volta as divisões que a grade sem vão apaga.
  */
 export function Experience() {
   const sectionRef = useRef<HTMLElement>(null);
+
+  const lightRef = useRef<HTMLSpanElement>(null);
+  const pointRef = useRef({ x: 0, y: 0 });
+  const frameRef = useRef(0);
+
+  /* Escrita direta no DOM, como no `BeamButton` — estado do React aqui
+     re-renderizaria a dobra a cada pixel.
+
+     Duas economias além dessa. O `transform` vai no elemento da luz, e não em
+     variáveis CSS na seção: variável escrita no ancestral invalida o estilo de
+     toda a descendência, e aqui basta mexer numa propriedade de um elemento
+     só. E a escrita é agendada num quadro: entre dois quadros o ponteiro
+     dispara vários eventos, e sem isso todos viram trabalho que ninguém vê. */
+  const trackPointer = (event: PointerEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    pointRef.current = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+
+    if (frameRef.current) return;
+
+    frameRef.current = requestAnimationFrame(() => {
+      frameRef.current = 0;
+      const { x, y } = pointRef.current;
+      lightRef.current?.style.setProperty(
+        "transform",
+        `translate3d(${x}px, ${y}px, 0)`,
+      );
+    });
+  };
+
+  useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
 
   useEffect(() => {
     const root = sectionRef.current;
@@ -80,8 +117,13 @@ export function Experience() {
     <section
       ref={sectionRef}
       id="experience"
-      className="relative overflow-hidden border-t border-line bg-bone"
+      onPointerMove={trackPointer}
+      className="flashlight-area overflow-hidden border-t border-line bg-bone"
     >
+      {/* A lanterna. Fica fora de vista ate o primeiro movimento do
+          ponteiro; o `:hover` da secao e quem a acende. */}
+      <span ref={lightRef} aria-hidden className="flash-light" />
+
       <Container className="py-24 md:py-32">
         {/* Cabeçalho centrado — a exceção da página, e de propósito: as duas
             dobras anteriores abrem à esquerda, e centrar esta marca a virada
@@ -111,19 +153,20 @@ export function Experience() {
             const Icon = CARD_ICON[card.icon];
 
             return (
-              <FlashlightCard
+              <article
                 key={card.title}
                 data-tap
-                className="js-xp-card min-h-[22rem] cursor-pointer border-b border-line last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0"
+                className="js-xp-card group flex min-h-[22rem] cursor-pointer flex-col justify-between border-b border-line bg-paper p-8 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0"
               >
                 {/* Ficha do ícone: a mesma do DS (48px, canto suave), com a
-                    inversão tinta/papel no hover. */}
-                <span className="relative z-10 grid h-12 w-12 place-items-center rounded-lg bg-mist text-ink transition-colors duration-500 group-hover:bg-ink group-hover:text-bone group-[.is-on]:bg-ink group-[.is-on]:text-bone">
+                    inversão tinta/papel no hover — em 300ms, e não nos 500ms
+                    do original. Troca de cor não tem percurso para o olho
+                    acompanhar: ou já mudou, ou está demorando. */}
+                <span className="grid h-12 w-12 place-items-center rounded-lg bg-mist text-ink transition-colors duration-300 group-hover:bg-ink group-hover:text-bone group-[.is-on]:bg-ink group-[.is-on]:text-bone">
                   <Icon className="text-2xl" />
                 </span>
 
-                {/* z-10 porque o radial da lanterna pinta em z-2. */}
-                <div className="relative z-10">
+                <div>
                   <h3 className="mb-3 text-2xl font-medium tracking-tight">
                     {card.title}
                   </h3>
@@ -132,12 +175,21 @@ export function Experience() {
                   </p>
                 </div>
 
-                {/* Régua que se preenche no hover — o gesto do `.link-draw` do
-                    DS aplicado à largura do cartão. */}
-                <span aria-hidden className="relative z-10 mt-8 block h-px w-full bg-line">
-                  <span className="ease-cinematic block h-full w-0 bg-ink transition-all duration-700 group-hover:w-full group-[.is-on]:w-full" />
+                {/* Régua que se preenche no hover — o gesto do `.link-draw`
+                    do DS aplicado à largura do cartão.
+
+                    Cresce por `scale`, não por `width`: largura é propriedade
+                    de layout, e animá-la obriga o navegador a refazer a conta
+                    a cada quadro (17ms de layout num único hover, medidos).
+                    Escala o compositor resolve sozinho.
+
+                    E 500ms, não 700ms. A curva do DS é expo-out: ela chega
+                    perto do fim logo e depois rasteja. Num percurso longo esse
+                    rastejo é o que se lê como lentidão. */}
+                <span aria-hidden className="mt-8 block h-px w-full bg-line">
+                  <span className="ease-cinematic block h-full w-full origin-left scale-x-0 bg-ink transition-[scale] duration-500 group-hover:scale-x-100 group-[.is-on]:scale-x-100" />
                 </span>
-              </FlashlightCard>
+              </article>
             );
           })}
         </div>

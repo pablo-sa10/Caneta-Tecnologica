@@ -15,15 +15,24 @@ export type HeadlineLine = {
 
 
 /**
- * Barra fixa do topo. Os itens do meio são só rótulos: a página ainda não tem
- * destinos, então eles não navegam para lugar nenhum (`<button>` inerte, não
- * `<a href="#">` — âncora vazia sequestra o histórico e mente para o leitor
- * de tela). Quando as seções existirem, troque cada item por `{ label, href }`.
+ * Barra fixa do topo. Os itens do meio são âncoras de verdade agora que as
+ * dobras existem — e o percurso até elas é rolagem, não salto (ver
+ * `SectionLink`).
  */
 export const nav = {
   logo: { name: "ARTOOLS", suffix: ".PRO" },
 
-  links: ["Design", "Technology", "Specs"],
+  /** Uma entrada por dobra da página — todas apontam para seções que existem. */
+  links: [
+    { label: "Tecnologia", href: "#technology" },
+    { label: "Experiência", href: "#experience" },
+    { label: "Assinatura", href: "#signature" },
+  ],
+
+  /* Rótulos do menu do telefone. O estado troca o `aria-label` junto com o
+     ícone: um botão que abre e fecha precisa dizer qual das duas coisas vai
+     fazer, e não como ele se chama. */
+  menu: { open: "Abrir menu de seções", close: "Fechar menu de seções" },
 
   theme: {
     label: "Alternar entre tema claro e escuro",
@@ -31,6 +40,9 @@ export const nav = {
     toLight: "Mudar para o tema claro",
   },
 
+  /* Fora da barra por ora: a página não vende nada ainda, e um ícone de
+     sacola que não abre coisa alguma promete uma loja que não existe. O
+     rótulo fica guardado aqui para o dia em que voltar. */
   bag: { label: "Sacola de compras" },
 } as const;
 
@@ -50,11 +62,13 @@ export const hero = {
 
   lead: "A Artools Precision Pen redefine o equilíbrio entre peso, fluxo e design. Feita para criadores que exigem perfeição em cada traço.",
 
-  /* Sem destino ainda — por isso os dois são `<button>` inerte, como no DS,
-     e não `<a href="#">`. Quando as seções existirem, acrescente o `href`. */
   actions: {
+    /* Sem destino: a página não vende nada ainda, então é `<button>` inerte
+       e não âncora vazia, que sequestraria o histórico. */
     primary: { label: "Comprar agora" },
-    secondary: { label: "Explorar" },
+    /* Este tem destino: leva à dobra seguinte. O percurso é rolagem de
+       verdade, então a caneta é percorrida no caminho em vez de pulada. */
+    secondary: { label: "Explorar", href: "#technology" },
   },
 
   media: {
@@ -134,6 +148,45 @@ export const technology = {
 } as const;
 
 /**
+ * Rodapé. A estrutura é a do DS — chamada centrada, régua, grade de quatro
+ * colunas e o lettering gigante sangrando embaixo —, com o texto trocado.
+ *
+ * Os itens de `legal` vieram da referência do cliente e ainda não têm destino,
+ * então são `<button>` inerte, como os da barra: âncora vazia sequestra o
+ * histórico e mente para o leitor de tela. Os de `sections`, ao contrário,
+ * apontam para seções que existem de verdade.
+ */
+export const footer = {
+  cta: {
+    lead: "Uma caneta.",
+    trail: "Infinitos traços.",
+    action: "Voltar ao topo",
+  },
+
+  brand: { name: "ARTOOLS", suffix: ".PRO" },
+
+  /* Só fato que já aparece em outro lugar deste arquivo. */
+  blurb:
+    "Precision Series — chassi de alumínio 6061-T6, ponta de 0,3 mm e um traço que não hesita.",
+
+  sections: {
+    title: "Seções",
+    links: [
+      { label: "Tecnologia", href: "#technology" },
+      { label: "Experiência", href: "#experience" },
+      { label: "Assinatura", href: "#signature" },
+    ],
+  },
+
+  legal: { title: "Legal", links: ["Privacy", "Terms", "Support"] },
+
+  meta: ["© 2027 Artools Inc.", "Zurich"],
+
+  /** Vazado gigante que fecha a página, sangrando pelas laterais. */
+  wordmark: "ARTOOLS.PRO",
+} as const;
+
+/**
  * Fecho da página: o convite. O fundo é o carrossel da hero do DS — as três
  * fotos dele, em monocromático, trocando devagar atrás de um cartão escuro.
  *
@@ -154,8 +207,8 @@ export const signature = {
   intervalMs: 5000,
 
   brand: { name: "Artools", suffix: "Pro" },
-  meta: "Signature Series • 2026",
-  action: { label: "Get Early Access" },
+  meta: "Série Assinatura • 2027",
+  action: { label: "Acesso antecipado" },
 } as const;
 
 /**

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Footer } from "@/components/sections/Footer";
 import { Navbar } from "@/components/sections/Navbar";
 import { SmoothScrollProvider } from "@/components/providers/SmoothScrollProvider";
 import { TapActivation } from "@/components/providers/TapActivation";
@@ -43,7 +44,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             para que o que responde ao ponteiro também responda ao dedo. */}
         <TapActivation />
         <Navbar />
-        <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <SmoothScrollProvider>
+          {children}
+          {/* Moldura do site, como a barra — mas dentro do provider, porque o
+              botão de voltar ao topo precisa do Lenis montado. */}
+          <Footer />
+        </SmoothScrollProvider>
         {/* Grão de filme por cima de tudo — fixo, inerte ao ponteiro. */}
         <div aria-hidden className="noise" />
       </body>

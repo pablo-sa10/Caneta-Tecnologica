@@ -318,7 +318,11 @@ export function Hero() {
                     </span>
                   </BeamButton>
 
-                  <ConicButton>
+                  {/* Âncora, não botão: leva à dobra seguinte. E como o
+                      percurso é rolagem de verdade, o pin da hero é
+                      atravessado no caminho — a caneta é percorrida em vez de
+                      pulada, mesmo para quem clica sem ter rolado nada. */}
+                  <ConicButton href={hero.actions.secondary.href}>
                     <span className="relative z-10 text-sm font-medium uppercase tracking-widest">
                       {hero.actions.secondary.label}
                     </span>

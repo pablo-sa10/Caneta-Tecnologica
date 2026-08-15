@@ -21,6 +21,10 @@ const ICONS = {
   "arrow-right-linear": "IconArrowRight",
   "arrow-down-linear": "IconArrowDown",
   "crown-star-bold-duotone": "IconCrown",
+  "arrow-up-linear": "IconArrowUp",
+  "globe-linear": "IconGlobe",
+  "hamburger-menu-linear": "IconMenu",
+  "close-circle-linear": "IconClose",
   "database-bold-duotone": "IconDatabase",
   "pen-new-square-linear": "IconPenLine",
   "soundwave-square-linear": "IconSoundwave",
@@ -70,3 +74,30 @@ ${components.join("\n\n")}
 const target = fileURLToPath(new URL("../components/ui/icons.tsx", import.meta.url));
 writeFileSync(target, out, "utf8");
 console.log(`✓ ${Object.keys(ICONS).length} ícones escritos em components/ui/icons.tsx`);
+
+/* ---------- Favicon ----------
+   O ícone da guia é a mesma marca da barra: quadrado de tinta com a caneta
+   vazada por dentro. Sai daqui, e não de um arquivo desenhado à mão, para não
+   existirem duas versões do mesmo símbolo que possam divergir.
+
+   As cores são literais porque um favicon é um arquivo isolado: nenhuma
+   variável da página chega até ele. São os valores de `--ink` e `--bone` do
+   tema claro — a guia não acompanha o tema do site.
+
+   O `app/icon.svg` é reconhecido pelo App Router sozinho: o Next gera o
+   `<link rel="icon">` e o hash do arquivo, sem precisar tocar no layout. */
+const INK = "#1C1C1C";
+const BONE = "#EFEDE7";
+
+const mark = getIconData(collection, "pen-new-square-bold-duotone");
+const { body: markBody } = iconToSVG(mark, { height: "24" });
+
+const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="${INK}"/>
+  <g transform="translate(4 4)" color="${BONE}">${markBody}</g>
+</svg>
+`;
+
+const faviconTarget = fileURLToPath(new URL("../app/icon.svg", import.meta.url));
+writeFileSync(faviconTarget, favicon, "utf8");
+console.log("✓ favicon escrito em app/icon.svg");
