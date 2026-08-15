@@ -145,6 +145,51 @@ button:disabled {
   -webkit-text-fill-color: transparent;
 }
 
+/* Photo-clip: a foto vive DENTRO da letra e passeia devagar por trás dela.
+
+   O véu escuro empilhado sobre a imagem é o que garante a leitura em qualquer
+   frame do passeio — sem ele as letras somem quando a área clara do arquivo
+   passa por baixo delas. `background-size: 140%` deixa folga para o pan
+   percorrer; a 100% não haveria para onde ir.
+
+   A imagem precisa de textura e contraste para o efeito existir: o que se vê
+   dentro da letra é um recorte de poucos centímetros. O frame do vídeo do
+   produto não serve para isto — caneta branca sobre fundo branco vira uma
+   mancha clara uniforme dentro do tipo. */
+.text-photo {
+  background-image: linear-gradient(rgba(28, 28, 28, 0.45), rgba(28, 28, 28, 0.45)),
+    url("/media/lettering-texture.webp");
+  background-size: 140% auto;
+  background-position: 100% var(--photo-y, 50%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: grayscale(1) contrast(1.25);
+  animation: photoPan 30s ease-in-out infinite alternate-reverse;
+}
+
+/* No escuro o véu clareia a foto em vez de escurecê-la: a letra passa a ser o
+   claro sobre a superfície escura, como o resto da tipografia do tema. */
+:root[data-theme="dark"] .text-photo {
+  background-image: linear-gradient(rgba(239, 237, 231, 0.26), rgba(239, 237, 231, 0.26)),
+    url("/media/lettering-texture.webp");
+  filter: grayscale(1) contrast(1.2) brightness(1.3);
+}
+
+/* Só o eixo horizontal. O DS também passeia na vertical (`40%` → `60%`), mas
+   lá a foto vive numa linha só; aqui ela atravessa três, e é o eixo vertical
+   que costura um recorte no outro (ver `--photo-y`). Animar os dois eixos
+   descoseria a emenda a cada frame. */
+@keyframes photoPan {
+  from {
+    background-position-x: 0%;
+  }
+  to {
+    background-position-x: 100%;
+  }
+}
+
 /* Inverte o que estiver atrás — usado sobre o vídeo. */
 .text-difference {
   color: #fff;
@@ -510,7 +555,8 @@ button:disabled {
   .hairline,
   .hairline-y,
   .radar-dot::after,
-  .conic-ring span.ring {
+  .conic-ring span.ring,
+  .text-photo {
     animation: none;
   }
 

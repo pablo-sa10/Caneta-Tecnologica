@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import gsap from "gsap";
 import { Container } from "@/components/ui/Container";
 import { Eyebrow } from "@/components/ui/Eyebrow";
@@ -27,6 +27,38 @@ const EASE = "expo.out";
  * proporção entre os itens.
  */
 const PACE = 1.6;
+
+/** Tratamento de lettering do `content.ts` → classe-assinatura do DS. */
+const TREATMENT_CLASS = {
+  outline: "text-outline",
+  gradient: "gradient-text",
+  photo: "text-photo",
+} as const;
+
+/**
+ * Avanço vertical de uma linha do título para a seguinte, em `em`. É o
+ * `leading-[0.8]` do `h1`: o padding das máscaras é cancelado pela margem
+ * negativa, então o que sobra entre o topo de uma linha e o da próxima é a
+ * entrelinha limpa. Mexeu no `leading`, mexa aqui.
+ */
+const LINE_ADVANCE_EM = 0.8;
+
+/**
+ * Recorte vertical da foto para a linha `index`.
+ *
+ * Cada linha é um elemento próprio e o `background-clip: text` recorta contra a
+ * caixa dela, então as três linhas mostrariam o mesmo pedaço da imagem — três
+ * cópias do mesmo trecho empilhadas, não uma fotografia atrás do título. Subir
+ * a imagem exatamente um avanço de linha por vez faz cada recorte continuar de
+ * onde o anterior parou.
+ *
+ * Funciona porque as três linhas têm a mesma largura e a mesma altura: são
+ * itens de um flex em coluna, que por padrão se esticam até a largura do `h1`.
+ * Se o título deixar de ser flex, ou as linhas ganharem larguras diferentes, a
+ * escala da imagem passa a variar de linha para linha e a emenda se perde.
+ */
+const photoOffset = (index: number) =>
+  ({ "--photo-y": `calc(50% - ${index} * ${LINE_ADVANCE_EM}em)` }) as CSSProperties;
 
 /**
  * Por que GSAP + Lenis:
@@ -245,7 +277,7 @@ export function Hero() {
                     no meio da linha. No DS o problema não aparece porque lá
                     cada linha do título é uma palavra só. */}
                 <h1 className="flex flex-col text-[16vw] font-semibold leading-[0.8] tracking-tighter [word-spacing:-0.08em] lg:text-[5rem] xl:text-[6.2rem] 2xl:text-[7rem]">
-                  {hero.headline.map((line) => (
+                  {hero.headline.map((line, index) => (
                     /* Máscara: o wrapper corta, o inner desliza de baixo. O
                        padding abre espaço para o que a entrelinha apertada
                        deixa de fora — sem ele o overflow come o acento de
@@ -268,10 +300,9 @@ export function Hero() {
                     >
                       <span
                         className={`js-headline-inner block ${
-                          line.treatment === "outline"
-                            ? "text-outline"
-                            : "gradient-text"
+                          TREATMENT_CLASS[line.treatment]
                         }`}
+                        style={photoOffset(index)}
                       >
                         {line.text}
                       </span>

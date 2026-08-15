@@ -6,8 +6,11 @@
 /** Uma linha do título, com o tratamento de lettering que o DS aplica a ela. */
 export type HeadlineLine = {
   text: string;
-  /** `outline` = traço vazado; `gradient` = preenchimento em --grad-ink */
-  treatment: "outline" | "gradient";
+  /**
+   * `outline` = traço vazado; `gradient` = preenchimento em --grad-ink;
+   * `photo` = a foto recortada dentro da letra, passeando devagar.
+   */
+  treatment: "outline" | "gradient" | "photo";
 };
 
 
@@ -32,14 +35,17 @@ export const nav = {
 } as const;
 
 export const hero = {
-  /* Três linhas, como o título da hero do DS. O vazado fica na do meio: é a
-     afirmação da frase, e sobre o vídeo o traço aberto deixa o produto
-     aparecer por dentro das letras. */
+  /* A foto corre pelas duas últimas linhas como uma fotografia só — o recorte
+     de uma continua no da outra — e o vazado abre a frase.
+
+     O DS dá um tratamento diferente para cada uma das três linhas porque a
+     hero dele é um mostruário: está ali para exibir os três de uma vez. Aqui o
+     título é o título, então o acabamento se repete onde faz sentido repetir.
+     O campo continua sendo por linha: trocar um valor muda o arranjo. */
   headline: [
-    { text: "A caneta", treatment: "gradient" },
-    { text: "mais", treatment: "outline" },
-    { text: "tecnológica", treatment: "outline" },
-    { text: "do mundo.", treatment: "gradient" },
+    { text: "A caneta", treatment: "outline" },
+    { text: "+tecnológica", treatment: "photo" },
+    { text: "do mundo.", treatment: "photo" },
   ] satisfies HeadlineLine[],
 
   lead: "A Artools Precision Pen redefine o equilíbrio entre peso, fluxo e design. Feita para criadores que exigem perfeição em cada traço.",
