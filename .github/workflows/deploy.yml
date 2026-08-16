@@ -18,6 +18,37 @@ env:
   IMAGE: ghcr.io/pablo-sa10/caneta-tecnologica
 
 jobs:
+  # ─── CI: o código está saudável? ────────────────────────────────────────────
+  # Roda em paralelo com o build, não antes: os dois começam juntos e você
+  # descobre erro de tipo em ~1 minuto, sem esperar a imagem Docker ficar pronta.
+  quality:
+    name: Lint e type-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Preparar o Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm # guarda o ~/.npm entre execuções; corta metade do tempo do npm ci
+
+      - name: Instalar dependências
+        run: npm ci --ignore-scripts
+
+      # O next build já verifica tipos, mas isto falha em ~40s em vez de esperar
+      # o build inteiro — e aponta o arquivo e a linha com mais clareza.
+      - name: Verificar tipos
+        run: npx tsc --noEmit
+
+      # A partir do Next 16 o next build não roda mais o ESLint sozinho. Sem
+      # este passo, as regras do eslint.config.mjs não seriam checadas em lugar
+      # nenhum do pipeline.
+      - name: Lint
+        run: npm run lint
+
   # ─── CI: o commit compila? ──────────────────────────────────────────────────
   build:
     name: Build e publicação da imagem
@@ -62,7 +93,11 @@ jobs:
   # ─── CD: coloca no ar ───────────────────────────────────────────────────────
   deploy:
     name: Deploy no VPS
-    needs: build # só roda se o build inteiro passou
+    # Só coloca no ar se o build E a verificação de qualidade passaram. É aqui
+    # que o lint vira barreira de verdade: erro de lint impede o deploy. Se um
+    # dia isso atrapalhar mais do que ajuda, troque por "needs: build" — o job
+    # quality continua rodando e reportando, só deixa de bloquear.
+    needs: [build, quality]
     runs-on: ubuntu-latest
 
     steps:
