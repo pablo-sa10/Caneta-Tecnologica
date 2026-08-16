@@ -38,6 +38,14 @@ jobs:
       - name: Instalar dependências
         run: npm ci --ignore-scripts
 
+      # Obrigatório antes do tsc. Tipos como LayoutProps e PageProps não são
+      # importados de lugar nenhum: o Next os gera em .next/types/ a partir da
+      # árvore de rotas. Num checkout limpo essa pasta não existe, e o tsc
+      # sozinho falha com "Cannot find name 'LayoutProps'". O typegen produz só
+      # essas definições, sem repetir o build inteiro.
+      - name: Gerar os tipos de rota do Next
+        run: npx next typegen
+
       # O next build já verifica tipos, mas isto falha em ~40s em vez de esperar
       # o build inteiro — e aponta o arquivo e a linha com mais clareza.
       - name: Verificar tipos
