@@ -16,12 +16,18 @@ const inter = Inter({
 });
 
 /**
- * Resolve o tema antes da primeira pintura — mesmo script do DS. Precisa ser
- * síncrono e inline no `<head>`: qualquer coisa que rode depois da hidratação
- * pinta a página no tema errado por um frame. `ThemeToggle` só cuida da troca
- * e da memória a partir daí.
+ * Resolve o tema antes da primeira pintura. Precisa ser síncrono e inline no
+ * `<head>`: qualquer coisa que rode depois da hidratação pinta a página no tema
+ * errado por um frame. `ThemeToggle` só cuida da troca e da memória a partir
+ * daí.
+ *
+ * Quem manda é a escolha guardada em `localStorage`; sem ela, a página abre no
+ * claro. O `prefers-color-scheme` do sistema não entra na conta — esta é uma
+ * página de produto, e o claro é o acabamento em que o objeto foi fotografado e
+ * a composição foi desenhada. O escuro continua a um clique de distância, e a
+ * partir daí é ele que abre.
  */
-const THEME_BOOTSTRAP = `(()=>{let t="light";try{const s=localStorage.getItem("aura-theme");t=s==="dark"||s==="light"?s:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}catch(e){}document.documentElement.dataset.theme=t})()`;
+const THEME_BOOTSTRAP = `(()=>{let t="light";try{const s=localStorage.getItem("aura-theme");if(s==="dark"||s==="light")t=s}catch(e){}document.documentElement.dataset.theme=t})()`;
 
 export const metadata: Metadata = {
   title: "ARTOOLS Precision Series — Caneta de tinta pigmentada 0.1",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { IconButton } from "./IconButton";
 import { IconMoonStars, IconSun } from "./icons";
 import { nav } from "@/lib/content";
@@ -9,16 +9,6 @@ type Theme = "light" | "dark";
 
 /** Mesma chave do DS — quem já escolheu um tema lá chega aqui com ele. */
 const STORAGE_KEY = "aura-theme";
-
-/** localStorage lança em modo privado/terceiros bloqueados; o tema não pode cair junto. */
-function readStored(): Theme | null {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved === "dark" || saved === "light" ? saved : null;
-  } catch {
-    return null;
-  }
-}
 
 /* ------------------------------------------------------------------
    O tema é estado do DOM, não do React: quem manda é o `data-theme` do
@@ -42,14 +32,17 @@ const getTheme = (): Theme =>
 /** No servidor não há como saber o tema — e chutar deixaria `aria-pressed` mentindo no HTML entregue. */
 const getThemeOnServer = (): Theme | null => null;
 
-function applyTheme(next: Theme, remember = true) {
+function applyTheme(next: Theme) {
   document.documentElement.dataset.theme = next;
-  if (remember) {
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* sem memória entre visitas — a troca desta sessão continua valendo */
-    }
+
+  /* A escolha é sempre guardada: é ela, e só ela, que o script do `layout.tsx`
+     consulta na visita seguinte. localStorage lança em modo privado ou com
+     armazenamento de terceiros bloqueado, e o tema não pode cair junto — sem
+     memória entre visitas, a troca desta sessão continua valendo. */
+  try {
+    localStorage.setItem(STORAGE_KEY, next);
+  } catch {
+    /* segue sem memória */
   }
   // Quem pinta em canvas/SVG não recalcula sozinho ao trocar as variáveis.
   window.dispatchEvent(new CustomEvent("aura:theme", { detail: next }));
@@ -58,6 +51,11 @@ function applyTheme(next: Theme, remember = true) {
 /**
  * Troca e memória do tema. O primeiro paint já veio resolvido pelo script
  * inline do `layout.tsx`; aqui só cuidamos do clique e da persistência.
+ *
+ * Não há escuta do `prefers-color-scheme`: o padrão da página é o claro, e o
+ * que o sobrepõe é o clique daqui, guardado em `localStorage`. Uma barra que
+ * seguisse o sistema mudaria de tema sozinha no meio da visita, sem ninguém ter
+ * pedido.
  *
  * Os dois ícones ficam sempre no DOM e o CSS (`.theme-icon-*` + `data-theme`)
  * decide qual aparece. Escolher o ícone em JS deixaria o servidor renderizar
@@ -69,18 +67,6 @@ export function ThemeToggle() {
     getTheme,
     getThemeOnServer,
   );
-
-  useEffect(() => {
-    // Enquanto o visitante não escolher, a barra acompanha o SO.
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onSystemChange = (event: MediaQueryListEvent) => {
-      if (readStored()) return;
-      applyTheme(event.matches ? "dark" : "light", false);
-    };
-
-    media.addEventListener("change", onSystemChange);
-    return () => media.removeEventListener("change", onSystemChange);
-  }, []);
 
   const isDark = theme === "dark";
 
