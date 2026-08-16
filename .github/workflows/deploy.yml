@@ -1,0 +1,79 @@
+name: Deploy
+
+# Quando este robô acorda.
+on:
+  push:
+    branches: [main] # todo push na main dispara build + deploy
+  workflow_dispatch: # e um botão "Run workflow" na aba Actions, para rodar à mão
+
+# Se você der dois pushes seguidos, o primeiro deploy é cancelado no meio em vez
+# de os dois disputarem o servidor e a ordem de chegada decidir o que fica no ar.
+concurrency:
+  group: deploy-producao
+  cancel-in-progress: true
+
+env:
+  # Precisa ser tudo minúsculo: o GHCR rejeita maiúsculas em nome de imagem, e o
+  # repositório se chama "Caneta-Tecnologica".
+  IMAGE: ghcr.io/pablo-sa10/caneta-tecnologica
+
+jobs:
+  # ─── CI: o commit compila? ──────────────────────────────────────────────────
+  build:
+    name: Build e publicação da imagem
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write # autoriza este job a publicar no GHCR
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      # Buildx é o motor de build moderno do Docker. Aqui ele entra pelo cache
+      # remoto: sem isso, cada execução recomeçaria do zero.
+      - name: Preparar o Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # GITHUB_TOKEN é gerado automaticamente para cada execução e expira ao
+      # final dela. Não é preciso criar nem guardar nada.
+      - name: Autenticar no GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build e push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:${{ github.sha }}
+          # :latest é o que o servidor puxa. A tag com o SHA do commit é o seu
+          # histórico — para voltar a uma versão anterior basta apontar o
+          # compose para o SHA que funcionava.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ─── CD: coloca no ar ───────────────────────────────────────────────────────
+  deploy:
+    name: Deploy no VPS
+    needs: build # só roda se o build inteiro passou
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trocar o container por SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          # A chave no servidor está travada com command=, então o texto abaixo
+          # é ignorado e o deploy.sh roda de qualquer forma. Ele está aqui para
+          # deixar explícito o que acontece do outro lado.
+          script: /root/artoolspro/deploy.sh

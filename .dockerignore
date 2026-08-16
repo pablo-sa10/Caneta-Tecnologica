@@ -1,0 +1,24 @@
+# Tudo que estiver listado aqui nunca é enviado ao daemon do Docker.
+# Vale por velocidade (contexto menor = build mais rápido) e por segurança
+# (um .env copiado por engano vira uma camada legível na imagem publicada).
+
+node_modules
+.next
+out
+build
+
+.git
+.github
+.gitignore
+
+.env
+.env.*
+
+.vscode
+.claude
+CLAUDE.md
+README.md
+
+npm-debug.log*
+*.tsbuildinfo
+.DS_Store
